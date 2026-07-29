@@ -1,0 +1,3 @@
+# Placeholder: point this node at the existing robots/agilex_piper driver configuration.
+port: can0
+is_follower: true

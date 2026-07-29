@@ -1,0 +1,23 @@
+nodes:
+  - id: joint_trajectory_controller
+    path: forge-joint-trajectory-controller
+    args: --config piper_arm.yaml
+    inputs:
+      tick: dora/timer/millis/20
+      joint_state: robot_piper/state
+      trajectory_goal: motion_server/trajectory_goal
+      trajectory_cancel: motion_server/trajectory_cancel
+    outputs:
+      - joint_command
+      - trajectory_feedback
+      - trajectory_result
+
+  # The real Piper node consumes only the controller's low-level position references.
+  - id: robot_piper
+    path: ${PIPER_BIN}
+    args: --config piper.yaml
+    inputs:
+      tick: dora/timer/millis/20
+      action: joint_trajectory_controller/joint_command
+    outputs:
+      - state
