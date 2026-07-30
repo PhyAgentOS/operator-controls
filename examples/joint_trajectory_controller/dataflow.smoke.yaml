@@ -1,0 +1,37 @@
+nodes:
+  - id: trajectory_action_client
+    path: uv
+    args: run --project ../.. python trajectory_action_client.py --result-file smoke-result.json --timeout-s 20
+    inputs:
+      tick: dora/timer/millis/20
+      joint_state: fake_joint_plant/joint_state
+      joint_command: joint_trajectory_controller/joint_command
+      trajectory_feedback: joint_trajectory_controller/trajectory_feedback
+      trajectory_result: joint_trajectory_controller/trajectory_result
+    outputs:
+      - trajectory_goal
+      - trajectory_cancel
+      - plant_control
+
+  - id: joint_trajectory_controller
+    path: uv
+    args: run --project ../.. forge-joint-trajectory-controller --config piper_arm.yaml
+    inputs:
+      tick: dora/timer/millis/20
+      joint_state: fake_joint_plant/joint_state
+      trajectory_goal: trajectory_action_client/trajectory_goal
+      trajectory_cancel: trajectory_action_client/trajectory_cancel
+    outputs:
+      - joint_command
+      - trajectory_feedback
+      - trajectory_result
+
+  - id: fake_joint_plant
+    path: uv
+    args: run --project ../.. python fake_joint_plant.py --period-ms 20 --response-gain 0.45
+    inputs:
+      tick: dora/timer/millis/20
+      joint_command: joint_trajectory_controller/joint_command
+      plant_control: trajectory_action_client/plant_control
+    outputs:
+      - joint_state

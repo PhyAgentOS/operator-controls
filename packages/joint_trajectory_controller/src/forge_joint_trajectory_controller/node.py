@@ -138,9 +138,8 @@ def _goal_id(event: dict[str, Any]) -> str | None:
     if not isinstance(metadata, dict):
         return None
     parameters = metadata.get("parameters")
-    if not isinstance(parameters, dict):
-        return None
-    value = parameters.get("goal_id")
+    source = parameters if isinstance(parameters, dict) else metadata
+    value = source.get("goal_id")
     if value is None:
         return None
     goal_id = str(value)
@@ -148,9 +147,9 @@ def _goal_id(event: dict[str, Any]) -> str | None:
 
 
 def _action_metadata(goal_id: str, goal_status: str | None = None) -> dict[str, Any]:
-    parameters: dict[str, Any] = {"goal_id": goal_id}
+    metadata: dict[str, Any] = {"goal_id": goal_id}
     if goal_status is not None:
         if goal_status not in {"succeeded", "aborted", "canceled"}:
             raise ValueError(f"invalid Dora goal_status: {goal_status}")
-        parameters["goal_status"] = goal_status
-    return {"parameters": parameters}
+        metadata["goal_status"] = goal_status
+    return metadata

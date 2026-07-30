@@ -5,3 +5,5 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+smoke-result.json
+examples/joint_trajectory_controller/out/

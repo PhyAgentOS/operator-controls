@@ -33,6 +33,10 @@ def _metadata(goal_id: str) -> dict[str, Any]:
     return {"parameters": {"goal_id": goal_id}}
 
 
+def _flat_metadata(goal_id: str) -> dict[str, Any]:
+    return {"goal_id": goal_id}
+
+
 def _goal() -> FollowJointTrajectoryGoal:
     return FollowJointTrajectoryGoal(
         trajectory=JointTrajectory(
@@ -73,6 +77,32 @@ def _adapter() -> JointTrajectoryControllerNode:
     return JointTrajectoryControllerNode(JointTrajectoryController(config))
 
 
+def test_adapter_accepts_flat_goal_metadata() -> None:
+    adapter = _adapter()
+    node = FakeNode()
+    adapter.handle_event(
+        node,
+        {
+            "type": "INPUT",
+            "id": "joint_state",
+            "value": JointState(name=["j1"], position=[0.0], velocity=[0.0], effort=[]).to_arrow(),
+        },
+        0,
+    )
+    adapter.handle_event(
+        node,
+        {
+            "type": "INPUT",
+            "id": "trajectory_goal",
+            "value": _goal().to_arrow(),
+            "metadata": _flat_metadata("flat-goal"),
+        },
+        0,
+    )
+
+    assert adapter.controller.active_goal_id == "flat-goal"
+
+
 def test_adapter_routes_goal_feedback_command_and_result_metadata() -> None:
     adapter = _adapter()
     node = FakeNode()
@@ -102,7 +132,7 @@ def test_adapter_routes_goal_feedback_command_and_result_metadata() -> None:
     assert command.position == [0.5]
     feedback = FollowJointTrajectoryFeedback.from_arrow(node.sent[1][1])
     assert feedback.elapsed_ns == 50
-    assert node.sent[1][2] == _metadata("goal-1")
+    assert node.sent[1][2] == {"goal_id": "goal-1"}
 
     adapter.handle_event(
         node,
@@ -122,7 +152,7 @@ def test_adapter_routes_goal_feedback_command_and_result_metadata() -> None:
     ]
     result = FollowJointTrajectoryResult.from_arrow(node.sent[-1][1])
     assert result.error_code == "SUCCESS"
-    assert node.sent[-1][2] == {"parameters": {"goal_id": "goal-1", "goal_status": "succeeded"}}
+    assert node.sent[-1][2] == {"goal_id": "goal-1", "goal_status": "succeeded"}
 
 
 def test_adapter_cancel_uses_goal_id_and_emits_canceled_result() -> None:
@@ -179,7 +209,7 @@ def test_adapter_cancel_uses_goal_id_and_emits_canceled_result() -> None:
     assert JointCommand.from_arrow(node.sent[0][1]).position == [0.25]
     result = FollowJointTrajectoryResult.from_arrow(node.sent[1][1])
     assert result.error_code == "CANCELED"
-    assert node.sent[1][2]["parameters"]["goal_status"] == "canceled"
+    assert node.sent[1][2]["goal_status"] == "canceled"
 
 
 def test_malformed_duplicate_does_not_terminate_the_active_goal() -> None:
@@ -235,7 +265,7 @@ def test_adapter_rejects_malformed_goal_and_ignores_missing_goal_id() -> None:
     )
     result = FollowJointTrajectoryResult.from_arrow(node.sent[0][1])
     assert result.error_code == "INVALID_GOAL"
-    assert node.sent[0][2]["parameters"]["goal_status"] == "aborted"
+    assert node.sent[0][2]["goal_status"] == "aborted"
 
     adapter.handle_event(
         node,
