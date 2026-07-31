@@ -1,0 +1,22 @@
+[project]
+name = "forge-gripper-action-controller"
+version = "0.1.0"
+description = "Dora GripperCommand controller for Forge robotics dataflows."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+authors = [
+    { name = "X-ERA" }
+]
+dependencies = [
+    "dora-rs==0.4.1",
+    "forge-msgs",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+forge-gripper-action-controller = "forge_gripper_action_controller.main:main"
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"

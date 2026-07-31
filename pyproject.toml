@@ -9,6 +9,7 @@ authors = [
     { name = "X-ERA" }
 ]
 dependencies = [
+    "forge-gripper-action-controller",
     "forge-joint-trajectory-controller",
 ]
 
@@ -20,12 +21,17 @@ dev = [
 
 [tool.uv.workspace]
 members = [
+    "packages/gripper_action_controller",
     "packages/joint_trajectory_controller",
 ]
 
 [tool.uv.sources]
+forge-gripper-action-controller = { workspace = true }
 forge-joint-trajectory-controller = { workspace = true }
 forge-msgs = { path = "../forge/packages/msgs" }
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
 
 [tool.ruff]
 line-length = 100

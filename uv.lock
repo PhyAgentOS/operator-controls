@@ -5,6 +5,7 @@ requires-python = ">=3.12"
 [manifest]
 members = [
     "forge-controls",
+    "forge-gripper-action-controller",
     "forge-joint-trajectory-controller",
 ]
 
@@ -53,6 +54,7 @@ name = "forge-controls"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "forge-gripper-action-controller" },
     { name = "forge-joint-trajectory-controller" },
 ]
 
@@ -63,12 +65,32 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "forge-joint-trajectory-controller", editable = "packages/joint_trajectory_controller" }]
+requires-dist = [
+    { name = "forge-gripper-action-controller", editable = "packages/gripper_action_controller" },
+    { name = "forge-joint-trajectory-controller", editable = "packages/joint_trajectory_controller" },
+]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "ruff", specifier = ">=0.14.0" },
+]
+
+[[package]]
+name = "forge-gripper-action-controller"
+version = "0.1.0"
+source = { editable = "packages/gripper_action_controller" }
+dependencies = [
+    { name = "dora-rs" },
+    { name = "forge-msgs" },
+    { name = "pyyaml" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "dora-rs", specifier = "==0.4.1" },
+    { name = "forge-msgs", directory = "../forge/packages/msgs" },
+    { name = "pyyaml", specifier = ">=6.0" },
 ]
 
 [[package]]
