@@ -18,6 +18,9 @@ dev = [
     "pytest>=8.0.0",
     "ruff>=0.14.0",
 ]
+build = [
+    "pyinstaller>=6.18.0",
+]
 
 [tool.uv.workspace]
 members = [
