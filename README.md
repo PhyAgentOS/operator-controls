@@ -16,3 +16,14 @@ includes focused unit and fake-plant tests.
 
 This workspace does not provide hard real-time motor control. Hardware firmware remains
 responsible for the low-level servo loop.
+
+## Standalone executables
+
+Run `scripts/build_pyinstaller.sh` from any directory to build these single-file artifacts:
+
+- `dist/gripper_action_controller`
+- `dist/joint_trajectory_controller`
+- `dist/fake_joint_plant`
+
+The build uses an isolated Python 3.12 environment and verifies each executable's help command.
+It also checks that missing or invalid required arguments produce argparse exit code 2.

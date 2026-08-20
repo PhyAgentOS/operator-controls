@@ -8,6 +8,7 @@ DIST_DIR="${ROOT_DIR}/dist"
 WORK_DIR="${ROOT_DIR}/build/pyinstaller"
 SPEC_FILE="${SCRIPT_DIR}/controls.spec"
 CONTROLLER="${DIST_DIR}/joint_trajectory_controller"
+GRIPPER_CONTROLLER="${DIST_DIR}/gripper_action_controller"
 FAKE_PLANT="${DIST_DIR}/fake_joint_plant"
 
 cleanup() {
@@ -34,7 +35,7 @@ expect_parse_error() {
 
 cd "${ROOT_DIR}"
 rm -rf "${BUILD_ENV}" "${WORK_DIR}"
-rm -f "${CONTROLLER}" "${FAKE_PLANT}"
+rm -f "${CONTROLLER}" "${GRIPPER_CONTROLLER}" "${FAKE_PLANT}"
 mkdir -p "${DIST_DIR}" "${WORK_DIR}"
 
 echo "==> 初始化隔离 Python 3.12 构建环境..."
@@ -67,7 +68,7 @@ echo "==> 构建 PyInstaller 单文件产物..."
   --workpath "${WORK_DIR}" \
   "${SPEC_FILE}"
 
-for executable in "${CONTROLLER}" "${FAKE_PLANT}"; do
+for executable in "${CONTROLLER}" "${GRIPPER_CONTROLLER}" "${FAKE_PLANT}"; do
   if [[ ! -x "${executable}" ]]; then
     echo "ERROR: 未找到可执行产物 ${executable}" >&2
     exit 1
@@ -76,9 +77,11 @@ done
 
 echo "==> 验证帮助信息和参数解析..."
 "${CONTROLLER}" --help >/dev/null
+"${GRIPPER_CONTROLLER}" --help >/dev/null
 "${FAKE_PLANT}" --help >/dev/null
 expect_parse_error "controller-parse-error" "${CONTROLLER}"
+expect_parse_error "gripper-controller-parse-error" "${GRIPPER_CONTROLLER}"
 expect_parse_error "fake-plant-parse-error" "${FAKE_PLANT}" --period-ms not-a-number
 
 echo "==> 构建及验证成功"
-ls -lh "${CONTROLLER}" "${FAKE_PLANT}"
+ls -lh "${CONTROLLER}" "${GRIPPER_CONTROLLER}" "${FAKE_PLANT}"

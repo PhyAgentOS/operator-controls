@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""Build the joint trajectory controller and fake joint plant as one-file executables."""
+"""Build the controls executables as one-file artifacts."""
 
 from pathlib import Path
 
@@ -16,6 +16,7 @@ def collect_package(package, datas, binaries, hiddenimports):
 spec_dir = Path(SPEC).resolve().parent
 root_dir = spec_dir.parent
 controller_src = root_dir / "packages" / "joint_trajectory_controller" / "src"
+gripper_controller_src = root_dir / "packages" / "gripper_action_controller" / "src"
 
 datas = []
 binaries = []
@@ -25,6 +26,7 @@ for dependency in ("dora", "forge_msgs", "numpy", "pyarrow", "yaml"):
     collect_package(dependency, datas, binaries, hiddenimports)
 
 hiddenimports.extend(collect_submodules("forge_joint_trajectory_controller"))
+hiddenimports.extend(collect_submodules("forge_gripper_action_controller"))
 hiddenimports = sorted(set(hiddenimports))
 
 
@@ -67,6 +69,11 @@ controller = build_executable(
     spec_dir / "joint_trajectory_controller_entry.py",
     "joint_trajectory_controller",
     [controller_src],
+)
+gripper_controller = build_executable(
+    spec_dir / "gripper_action_controller_entry.py",
+    "gripper_action_controller",
+    [gripper_controller_src],
 )
 fake_plant = build_executable(
     root_dir / "examples" / "joint_trajectory_controller" / "fake_joint_plant.py",
