@@ -1,5 +1,7 @@
 name: Build Ubuntu 20.04 binaries
 
+# Triggered manually for binary releases; see OPEN_SOURCE_AUDIT.md.
+
 on:
   workflow_dispatch:
     inputs:
