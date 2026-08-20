@@ -27,3 +27,10 @@ Run `scripts/build_pyinstaller.sh` from any directory to build these single-file
 
 The build uses an isolated Python 3.12 environment and verifies each executable's help command.
 It also checks that missing or invalid required arguments produce argparse exit code 2.
+
+## License
+
+[Apache License 2.0](LICENSE). Runtime dependencies are not distributed with
+this source repository and retain their respective licenses; see
+[NOTICE](NOTICE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Review the complete bundled artifact before publishing standalone executables.

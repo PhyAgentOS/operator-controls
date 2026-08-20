@@ -10,7 +10,7 @@ authors = [
 ]
 dependencies = [
     "dora-rs==0.4.1",
-    "forge-msgs",
+    "forge-msgs==1.0.1",
     "pyyaml>=6.0",
 ]
 

@@ -31,7 +31,6 @@ members = [
 [tool.uv.sources]
 forge-gripper-action-controller = { workspace = true }
 forge-joint-trajectory-controller = { workspace = true }
-forge-msgs = { path = "../forge/packages/msgs" }
 
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib"]
