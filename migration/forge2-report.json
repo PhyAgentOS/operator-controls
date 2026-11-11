@@ -1,7 +1,6 @@
 {
   "repository": "operator-controls",
   "node_candidate_version": "2.0.0",
-  "baseline_commit": "21cec517cef7af62e0f48df5a4e50b48efdd4efa",
   "changes": [
     "Upgrade both trajectory and gripper controller workspace packages.",
     "Synchronize English/Chinese root README guidance and frozen dependencies."
