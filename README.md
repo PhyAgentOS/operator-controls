@@ -1,5 +1,7 @@
 # Forge Controls
 
+[English](README.md) | [简体中文](README_zh.md)
+
 Reusable motion execution and control capabilities for Forge/Dora robotics dataflows.
 
 The workspace provides lightweight motion controllers that consume Dora action payloads from
@@ -34,3 +36,9 @@ It also checks that missing or invalid required arguments produce argparse exit 
 this source repository and retain their respective licenses; see
 [NOTICE](NOTICE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 Review the complete bundled artifact before publishing standalone executables.
+
+## Forge 2.x migration
+
+This branch prepares node version `2.0.0` for Dora 1.x, frozen to Dora `1.0.1` for migration validation. It uses the official Forge 2.x distributions; Common is at least `2.1.0`. Regenerated locks and all executable entrypoints are part of the change.
+
+Every change report must list repository, changes and test evidence, including per-node `dora run` records and a chained test containing `adapter-forge-gateway`. Unavailable hardware/model checks remain pending. Source PRs do not publish stable releases or synchronize GitLab; synchronization follows full acceptance.
