@@ -90,8 +90,7 @@
       "forge-msgs": "2.1.0",
       "pillow": "13.0.0",
       "dora-rs": "1.0.1"
-    },
-    "log": "msgs-2.1.0-logs/tests.log"
+    }
   },
   "dependency_audit": {
     "repo": "operator-controls",
@@ -191,7 +190,7 @@
       "mode": "chain",
       "source_report": "runtime/joint-trajectory-controller/chain/report.json",
       "runtime_errors": [],
-      "log": "msgs-2.1.0-logs/runtime/joint-trajectory-controller/chain/dora.log"
+      "local_evidence": "Full original Dora log is retained under validation/downstream-msgs210-20261112/runtime/joint-trajectory-controller/chain/dora.log"
     },
     {
       "repo": "operator-controls",
@@ -211,7 +210,7 @@
       "scope": "Startup, timer processing and normal Dora stop only; no hardware or action execution.",
       "source_report": "runtime/joint-trajectory-controller/single/report.json",
       "runtime_errors": [],
-      "log": "msgs-2.1.0-logs/runtime/joint-trajectory-controller/single/dora.log"
+      "local_evidence": "Full original Dora log is retained under validation/downstream-msgs210-20261112/runtime/joint-trajectory-controller/single/dora.log"
     },
     {
       "repo": "operator-controls",
@@ -285,7 +284,7 @@
       "mode": "chain",
       "source_report": "runtime/gripper-action-controller/chain/report.json",
       "runtime_errors": [],
-      "log": "msgs-2.1.0-logs/runtime/gripper-action-controller/chain/dora.log"
+      "local_evidence": "Full original Dora log is retained under validation/downstream-msgs210-20261112/runtime/gripper-action-controller/chain/dora.log"
     },
     {
       "repo": "operator-controls",
@@ -305,10 +304,11 @@
       "scope": "Startup, timer processing and normal Dora stop only; no hardware or action execution.",
       "source_report": "runtime/gripper-action-controller/single/report.json",
       "runtime_errors": [],
-      "log": "msgs-2.1.0-logs/runtime/gripper-action-controller/single/dora.log"
+      "local_evidence": "Full original Dora log is retained under validation/downstream-msgs210-20261112/runtime/gripper-action-controller/single/dora.log"
     }
   ],
   "remaining": "Applicable actual hardware/model, final supported-platform artifacts, sustained run and rollback acceptance remain pending.",
   "acceptance": "Pending; software checks, fake/dummy backends and negative prerequisite records are scoped evidence only. Every new multi-node graph contains adapter-forge-gateway.",
-  "gitlab_sync": "Not performed; follows completed acceptance."
+  "gitlab_sync": "Not performed; follows completed acceptance.",
+  "log_publication": "Original logs remain in the local validation workspace. This public report publishes reviewed commands, outcomes, assertions and limitations only."
 }
