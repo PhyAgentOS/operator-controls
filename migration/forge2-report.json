@@ -1,0 +1,205 @@
+{
+  "repository": "operator-controls",
+  "node_candidate_version": "2.0.0",
+  "changes": [
+    "Upgrade both trajectory and gripper controller workspace packages.",
+    "Synchronize English/Chinese root README guidance and frozen dependencies."
+  ],
+  "software_tests": {
+    "log": "ci-tests.log",
+    "summary": [
+      "61 passed in 0.27s"
+    ]
+  },
+  "dora_cli": "1.0.1",
+  "runtime_records": [
+    {
+      "repo": "operator-controls",
+      "entry": "joint-trajectory-controller",
+      "mode": "single",
+      "command": [
+        "${WORKSPACE}/.test-env/bin/dora",
+        "run",
+        "${WORKSPACE}/validation/forge2/runtime/joint-trajectory-controller/single/dataflow.yaml",
+        "--stop-after",
+        "6s"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 6.135,
+      "passed": true,
+      "error": null,
+      "scope": "Startup, timer processing and normal Dora stop only; no hardware or action execution."
+    },
+    {
+      "repo": "operator-controls",
+      "entry": "gripper-action-controller",
+      "mode": "single",
+      "command": [
+        "${WORKSPACE}/.test-env/bin/dora",
+        "run",
+        "${WORKSPACE}/validation/forge2/runtime/gripper-action-controller/single/dataflow.yaml",
+        "--stop-after",
+        "6s"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 6.108,
+      "passed": true,
+      "error": null,
+      "scope": "Startup, timer processing and normal Dora stop only; no hardware or action execution."
+    },
+    {
+      "repo": "operator-controls",
+      "entry": "joint-trajectory-controller",
+      "command": [
+        "${WORKSPACE}/.test-env/bin/dora",
+        "run",
+        "${WORKSPACE}/validation/forge2/runtime/joint-trajectory-controller/chain/dataflow.yaml",
+        "--stop-after",
+        "10s"
+      ],
+      "includes_gateway": true,
+      "passed": true,
+      "scope": "Production node with simulated state/actuator; Gateway receives state and commands. No hardware.",
+      "state": {
+        "running_time": 1.187,
+        "current_frame_count": 33,
+        "sensors": {
+          "joints": {
+            "joint1": 0.0,
+            "joint2": 0.0,
+            "joint3": 0.0,
+            "joint4": 0.0,
+            "joint5": 0.0,
+            "joint6": 0.0
+          },
+          "command": {
+            "joint1": 0.00045875000000000006,
+            "joint2": 0.00045875000000000006,
+            "joint3": 0.00045875000000000006,
+            "joint4": 0.00045875000000000006,
+            "joint5": 0.00045875000000000006,
+            "joint6": 0.00045875000000000006
+          }
+        },
+        "runtime": {
+          "phase": "running",
+          "sim_status": {
+            "status_name": "UNINITIALIZED",
+            "status_code": 0
+          },
+          "record_status": {
+            "record_state": "IDLE",
+            "episode_count": 0,
+            "current_frame_count": 0
+          },
+          "playback_status": {
+            "playback_state": "IDLE",
+            "current_time_ns": 0,
+            "total_messages": 0,
+            "mcap_path": null,
+            "error": null
+          },
+          "readiness": {
+            "ready": true,
+            "missing": [],
+            "runtime_phase": "running",
+            "proprio_state_ready": true,
+            "required_images_ready": true,
+            "images": {},
+            "state_clients": 1,
+            "image_clients": 0,
+            "state_client_ready": true,
+            "image_client_ready": false
+          },
+          "last_error": null
+        }
+      },
+      "exit_code": 0,
+      "fixture": {
+        "passed": true,
+        "commands": 430,
+        "terminal_results": [
+          {
+            "goal_id": "smoke-goal",
+            "goal_status": "succeeded"
+          }
+        ],
+        "scope": "Simulated actuator only"
+      }
+    },
+    {
+      "repo": "operator-controls",
+      "entry": "gripper-action-controller",
+      "command": [
+        "${WORKSPACE}/.test-env/bin/dora",
+        "run",
+        "${WORKSPACE}/validation/forge2/runtime/gripper-action-controller/chain/dataflow.yaml",
+        "--stop-after",
+        "10s"
+      ],
+      "includes_gateway": true,
+      "passed": true,
+      "scope": "Production node with simulated state/actuator; Gateway receives state and commands. No hardware.",
+      "state": {
+        "running_time": 1.098,
+        "current_frame_count": 33,
+        "sensors": {
+          "joints": {
+            "joint1": 0.0
+          },
+          "command": {
+            "joint1": 0.02
+          }
+        },
+        "runtime": {
+          "phase": "running",
+          "sim_status": {
+            "status_name": "UNINITIALIZED",
+            "status_code": 0
+          },
+          "record_status": {
+            "record_state": "IDLE",
+            "episode_count": 0,
+            "current_frame_count": 0
+          },
+          "playback_status": {
+            "playback_state": "IDLE",
+            "current_time_ns": 0,
+            "total_messages": 0,
+            "mcap_path": null,
+            "error": null
+          },
+          "readiness": {
+            "ready": true,
+            "missing": [],
+            "runtime_phase": "running",
+            "proprio_state_ready": true,
+            "required_images_ready": true,
+            "images": {},
+            "state_clients": 1,
+            "image_clients": 0,
+            "state_client_ready": true,
+            "image_client_ready": false
+          },
+          "last_error": null
+        }
+      },
+      "exit_code": 0,
+      "fixture": {
+        "passed": true,
+        "commands": 437,
+        "terminal_results": [
+          {
+            "goal_id": "smoke-goal",
+            "goal_status": "succeeded"
+          }
+        ],
+        "scope": "Simulated actuator only"
+      }
+    }
+  ],
+  "runtime_missing": null,
+  "acceptance": "Pending final platform artifacts, applicable hardware/model execution and rollback/sustained-run gates.",
+  "pillow_dependency": "Node locks currently resolve published Forge Msgs 2.0.0. Security audit remains dependent on Forge PR #3 and a published security-fixed Msgs release; no vulnerability suppression was added.",
+  "gitlab_synchronization": "Not started; follows full acceptance."
+}
