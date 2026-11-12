@@ -1,0 +1,51 @@
+gateway: DEBUG    building node
+plant: DEBUG    building node
+target: DEBUG    building node
+16:11:13 DEBUG  gateway: daemon::spawner spawning node
+16:11:13 DEBUG  plant: daemon::spawner spawning node
+16:11:13 DEBUG  target: daemon::spawner spawning node
+
+16:11:13 INFO   [dora]: dora daemon finished building nodes, spawning...
+
+16:11:13 INFO   gateway: spawner spawning `${WORKSPACE}/adapter-forge-gateway/.venv/bin/python` in `${WORKSPACE}/validation/downstream-msgs210-20261112/runtime/joint-trajectory-controller/chain`
+16:11:13 DEBUG  gateway: spawner spawned node with pid 79096
+16:11:13 INFO   plant: spawner spawning `${WORKSPACE}/operator-controls/.venv/bin/python` in `${WORKSPACE}/validation/downstream-msgs210-20261112/runtime/joint-trajectory-controller/chain`
+16:11:13 DEBUG  plant: spawner spawned node with pid 79097
+16:11:13 INFO   target: spawner spawning `${WORKSPACE}/operator-controls/.venv/bin/forge-joint-trajectory-controller` in `${WORKSPACE}/validation/downstream-msgs210-20261112/runtime/joint-trajectory-controller/chain`
+16:11:13 DEBUG  target: spawner spawned node with pid 79098
+16:11:13 INFO   gateway: daemon node is ready
+16:11:13 INFO   plant: daemon node is ready
+16:11:13 INFO   target: daemon node is ready
+16:11:13 INFO   [dora]: daemon all nodes are ready, starting dataflow
+16:11:13 stdout gateway: INFO:     Started server process [79096]
+16:11:13 stdout gateway: INFO:     Uvicorn running on http://127.0.0.1:51375 (Press CTRL+C to quit)
+16:11:13 stdout gateway: 2026-11-12 16:11:13 - forge_gateway.cli - INFO - gateway serving http/ws on 127.0.0.1:51375
+16:11:13 stdout gateway: INFO:     127.0.0.1:51423 - "GET /health HTTP/1.1" 200 OK
+16:11:13 stdout gateway: INFO:     127.0.0.1:51424 - "WebSocket /ws/state" [accepted]
+16:11:13 stdout gateway: INFO:     connection open
+16:11:13 WARN   plant: dora_node_api::node output `goal`: 4936 B -> zenoh direct path (dora-rs/dora#2742 diagnostic)
+16:11:13 WARN   plant: dora_node_api::node output `goal`: entering zenoh put of an SHM buffer (dora-rs/dora#2742 diagnostic)
+16:11:13 WARN   plant: dora_node_api::node output `goal`: entering report_output_sent (dora-rs/dora#2742 diagnostic)
+16:11:14 WARN   target: dora_node_api::node output `trajectory_feedback`: 7112 B -> zenoh direct path (dora-rs/dora#2742 diagnostic)
+16:11:14 WARN   target: dora_node_api::node output `trajectory_feedback`: entering zenoh put of an SHM buffer (dora-rs/dora#2742 diagnostic)
+16:11:14 WARN   target: dora_node_api::node output `trajectory_feedback`: entering report_output_sent (dora-rs/dora#2742 diagnostic)
+16:11:14 WARN   target: dora_node_api::node output `trajectory_feedback`: 7112 B -> zenoh direct path (dora-rs/dora#2742 diagnostic)
+16:11:14 WARN   target: dora_node_api::node output `trajectory_feedback`: entering zenoh put of an SHM buffer (dora-rs/dora#2742 diagnostic)
+16:11:14 WARN   target: dora_node_api::node output `trajectory_feedback`: entering report_output_sent (dora-rs/dora#2742 diagnostic)
+16:11:14 stdout gateway: INFO:     connection closed
+16:11:14 WARN   target: dora_node_api::node output `trajectory_feedback`: 7112 B -> zenoh direct path (dora-rs/dora#2742 diagnostic)
+16:11:14 WARN   target: dora_node_api::node output `trajectory_feedback`: entering zenoh put of an SHM buffer (dora-rs/dora#2742 diagnostic)
+16:11:14 WARN   target: dora_node_api::node output `trajectory_feedback`: entering report_output_sent (dora-rs/dora#2742 diagnostic)
+2026-11-12T08:11:23.075899Z  INFO dora_daemon: stop-after timeout reached (10s) -> stopping dataflow
+2026-11-12T08:11:23.076078Z  INFO run_inner: dora_daemon: stopping after 10s as requested health_check_interval_duration=None self.daemon_id=DaemonId { machine_id: None, uuid: 01a1cecf-9530-7612-82e8-2dcf91760c2c }
+16:11:23 stdout gateway: 2026-11-12 16:11:23 - forge_gateway.cli - INFO - gateway Dora loop exited: stop
+16:11:23 DEBUG  plant: daemon handling node stop with exit status Success (restart: false, restart_count: 0)
+16:11:23 INFO   plant: daemon plant finished successfully
+16:11:23 DEBUG  target: daemon handling node stop with exit status Success (restart: false, restart_count: 0)
+16:11:23 INFO   target: daemon target finished successfully
+16:11:23 stdout gateway: INFO:     Shutting down
+16:11:23 stdout gateway: INFO:     Finished server process [79096]
+16:11:23 DEBUG  gateway: daemon handling node stop with exit status Success (restart: false, restart_count: 0)
+16:11:23 INFO   gateway: daemon gateway finished successfully
+16:11:23 INFO   [dora]: daemon dataflow finished on machine `01a1cecf-9530-7612-82e8-2dcf91760c2c`
+2026-11-12T08:11:23.295361Z  INFO run_inner: dora_daemon: exiting daemon because all required dataflows are finished health_check_interval_duration=None self.daemon_id=DaemonId { machine_id: None, uuid: 01a1cecf-9530-7612-82e8-2dcf91760c2c }
