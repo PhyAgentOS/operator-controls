@@ -16,7 +16,17 @@ class ControllerConfig:
     control_period_ns: int = 20_000_000
     feedback_timeout_ns: int = 200_000_000
     start_position_tolerance: float = 0.1
+    # Deprecated: accepted for YAML compatibility only. Per-tick planned-vs-measured
+    # deviation is no longer judged against the plant's tracking capability; the
+    # controller only aborts on a hard deviation or on a stalled plant (below).
     path_position_tolerance: float = 0.15
+    # Hard abort: a deviation above this is a real tracking failure.
+    path_abort_tolerance: float = 0.5
+    # Stall detection: the reference moved >= stuck_reference_epsilon within
+    # stuck_window_ns while the plant moved < stuck_actual_epsilon.
+    stuck_window_ns: int = 1_000_000_000
+    stuck_reference_epsilon: float = 0.05
+    stuck_actual_epsilon: float = 0.02
     goal_position_tolerance: float = 0.03
     goal_velocity_tolerance: float = 0.05
     goal_time_tolerance_ns: int = 500_000_000
@@ -35,6 +45,7 @@ class ControllerConfig:
             "control_period_ns",
             "feedback_timeout_ns",
             "goal_time_tolerance_ns",
+            "stuck_window_ns",
         ):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, int):
@@ -52,12 +63,19 @@ class ControllerConfig:
         for name in (
             "start_position_tolerance",
             "path_position_tolerance",
+            "path_abort_tolerance",
+            "stuck_reference_epsilon",
+            "stuck_actual_epsilon",
             "goal_position_tolerance",
             "goal_velocity_tolerance",
         ):
             value = getattr(self, name)
             if not math.isfinite(value) or value < 0.0:
                 raise ValueError(f"{name} must be finite and non-negative")
+        if self.path_abort_tolerance < self.path_position_tolerance:
+            raise ValueError(
+                "path_abort_tolerance must be greater than or equal to path_position_tolerance"
+            )
 
 
 def load_config(path: str | Path) -> ControllerConfig:
@@ -77,6 +95,10 @@ def controller_config_from_mapping(data: dict[str, Any]) -> ControllerConfig:
         "feedback_timeout_ms",
         "start_position_tolerance",
         "path_position_tolerance",
+        "path_abort_tolerance",
+        "stuck_window_ms",
+        "stuck_reference_epsilon",
+        "stuck_actual_epsilon",
         "goal_position_tolerance",
         "goal_velocity_tolerance",
         "goal_time_tolerance_ms",
@@ -98,7 +120,16 @@ def controller_config_from_mapping(data: dict[str, Any]) -> ControllerConfig:
             data.get("feedback_timeout_ms", 200), "feedback_timeout_ms"
         ),
         start_position_tolerance=float(data.get("start_position_tolerance", 0.1)),
-        path_position_tolerance=float(data.get("path_position_tolerance", 0.15)),
+        path_position_tolerance=(
+            _soft := float(data.get("path_position_tolerance", 0.15))
+        ),
+        # Legacy YAML may declare a soft band above 0.5 rad; keep the hard band above it.
+        path_abort_tolerance=float(data.get("path_abort_tolerance", max(0.5, _soft))),
+        stuck_window_ns=_milliseconds_to_ns(
+            data.get("stuck_window_ms", 1000), "stuck_window_ms"
+        ),
+        stuck_reference_epsilon=float(data.get("stuck_reference_epsilon", 0.05)),
+        stuck_actual_epsilon=float(data.get("stuck_actual_epsilon", 0.02)),
         goal_position_tolerance=float(data.get("goal_position_tolerance", 0.03)),
         goal_velocity_tolerance=float(data.get("goal_velocity_tolerance", 0.05)),
         goal_time_tolerance_ns=_milliseconds_to_ns(
