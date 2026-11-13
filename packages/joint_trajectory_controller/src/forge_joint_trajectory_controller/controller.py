@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from dataclasses import dataclass
 from typing import Literal
 
@@ -64,6 +64,8 @@ class JointTrajectoryController:
         self.state: ControllerState = "IDLE"
         self._actual: _ActualState | None = None
         self._active: _ActiveGoal | None = None
+        # Rolling (timestamp, measured positions) history used for stall detection.
+        self._history: deque[tuple[int, tuple[float, ...]]] = deque()
         self._hold_positions: tuple[float, ...] | None = None
         self._result_cache: OrderedDict[str, ControllerOutput] = OrderedDict()
         self._last_now_ns: int | None = None
@@ -176,6 +178,7 @@ class JointTrajectoryController:
         )
         self.state = "ACTIVE"
         self._hold_positions = None
+        self._history.clear()
         return None
 
     def reject_invalid_goal(
@@ -243,17 +246,43 @@ class JointTrajectoryController:
         )
 
         if elapsed_ns < active.trajectory.duration_ns:
-            if any(
-                abs(error) > tolerance
-                for error, tolerance in zip(
-                    position_error,
-                    active.path_position_tolerance,
-                    strict=True,
-                )
-            ):
+            # Plant capability is deliberately NOT judged per tick: a small tracking
+            # lag is normal and depends on velocity/servo tuning. Only two coarse
+            # conditions abort the motion: a hard deviation, or a stalled plant.
+            self._history.append((now_ns, tuple(self._actual.positions)))
+            window_start_ns = now_ns - self.config.stuck_window_ns
+            while self._history and self._history[0][0] < window_start_ns:
+                self._history.popleft()
+
+            worst_index = max(
+                range(len(position_error)),
+                key=lambda index: abs(position_error[index]),
+            )
+            worst_error = abs(position_error[worst_index])
+            if worst_error > self.config.path_abort_tolerance:
+                joint = self.config.joint_names[worst_index]
                 return self._finish_active(
                     error_code="PATH_TOLERANCE_VIOLATED",
-                    message="trajectory path position tolerance was violated",
+                    message=(
+                        f"deviation {worst_error:.3f} rad on {joint} exceeds abort tolerance "
+                        f"{self.config.path_abort_tolerance:.3f} rad "
+                        f"(planned {sample.positions[worst_index]:.3f}, "
+                        f"actual {self._actual.positions[worst_index]:.3f})"
+                    ),
+                    goal_status="aborted",
+                    now_ns=now_ns,
+                    desired=sample,
+                    hold_positions=self._actual.positions,
+                )
+
+            if self._stalled(active, sample, now_ns=now_ns, elapsed_ns=elapsed_ns):
+                return self._finish_active(
+                    error_code="PATH_TOLERANCE_VIOLATED",
+                    message=(
+                        "no measurable progress for "
+                        f"{self.config.stuck_window_ns / 1_000_000_000:.2f} s while the reference "
+                        "kept moving; the joint is blocked or cannot follow"
+                    ),
                     goal_status="aborted",
                     now_ns=now_ns,
                     desired=sample,
@@ -294,6 +323,37 @@ class JointTrajectoryController:
             goal_id=active.goal_id,
             command=command,
             feedback=feedback,
+        )
+
+    def _stalled(
+        self,
+        active: _ActiveGoal,
+        sample: TrajectorySample,
+        *,
+        now_ns: int,
+        elapsed_ns: int,
+    ) -> bool:
+        """True when the reference keeps moving but the plant does not move at all."""
+        if len(self._history) < 2 or self._actual is None:
+            return False
+        oldest_ns, oldest_positions = self._history[0]
+        window_elapsed_ns = max(0, elapsed_ns - (now_ns - oldest_ns))
+        reference_old = sample_trajectory(active.trajectory, window_elapsed_ns)
+        reference_moved = max(
+            abs(current - previous)
+            for current, previous in zip(
+                sample.positions, reference_old.positions, strict=True
+            )
+        )
+        actual_moved = max(
+            abs(current - previous)
+            for current, previous in zip(
+                self._actual.positions, oldest_positions, strict=True
+            )
+        )
+        return (
+            reference_moved >= self.config.stuck_reference_epsilon
+            and actual_moved < self.config.stuck_actual_epsilon
         )
 
     def _goal_reached(self, active: _ActiveGoal, sample: TrajectorySample) -> bool:
