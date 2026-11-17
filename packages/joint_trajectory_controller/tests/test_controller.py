@@ -327,3 +327,27 @@ def test_stalled_plant_aborts_after_the_window() -> None:
     assert result.result is not None
     assert result.result.error_code == "PATH_TOLERANCE_VIOLATED"
     assert "no measurable progress" in result.result.message
+
+
+def test_abort_keeps_commanding_the_measured_position() -> None:
+    """Recovery is deliberately trivial: hold the measured pose, no decel ramp, no retry."""
+    controller = JointTrajectoryController(
+        _config(path_position_tolerance=0.01, path_abort_tolerance=0.01)
+    )
+    controller.update_joint_state(_state(positions=(0.3, -0.4)), 0)
+    controller.accept_goal("goal", _goal(first=(0.3, -0.4)), 0)
+
+    aborted = controller.tick(25)
+    assert aborted is not None and aborted.result is not None
+    assert aborted.result.error_code == "PATH_TOLERANCE_VIOLATED"
+    assert controller.state == "HOLDING"
+
+    # Every later tick keeps commanding the position measured at the abort.
+    for elapsed_ns in range(30, 200, 10):
+        controller.update_joint_state(_state(positions=(0.3, -0.4)), elapsed_ns)
+        hold = controller.tick(elapsed_ns)
+        assert hold is not None, "the controller must keep holding after an abort"
+        assert hold.result is None
+        assert hold.command is not None
+        assert hold.command.mode == "position"
+        assert hold.command.position == pytest.approx([0.3, -0.4])
