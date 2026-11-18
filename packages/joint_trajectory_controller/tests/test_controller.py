@@ -315,16 +315,15 @@ def test_stalled_plant_aborts_after_the_window() -> None:
     controller.update_joint_state(_state(), 0)
     assert controller.accept_goal("goal", _goal(duration_ns=2_000_000_000), 0) is None
 
-    result = None
-    for elapsed_ns in range(0, 1_000_000_000, 50_000_000):
-        controller.update_joint_state(_state(positions=(0.0, 0.0)), elapsed_ns)
+    for elapsed_ns in (0, 50_000_000, 100_000_000, 199_000_000):
+        controller.update_joint_state(_state(), elapsed_ns)
         output = controller.tick(elapsed_ns)
-        if output is not None and output.result is not None:
-            result = output
-            break
+        assert output is not None and output.result is None
 
-    assert result is not None, "a frozen plant must abort instead of finishing silently"
-    assert result.result is not None
+    # The first tick after the window has elapsed is slightly late.
+    controller.update_joint_state(_state(), 201_000_000)
+    result = controller.tick(201_000_000)
+    assert result is not None and result.result is not None
     assert result.result.error_code == "PATH_TOLERANCE_VIOLATED"
     assert "no measurable progress" in result.result.message
 

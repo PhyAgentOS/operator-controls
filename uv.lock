@@ -61,7 +61,7 @@ wheels = [
 
 [[package]]
 name = "forge-controls"
-version = "2.0.0"
+version = "2.0.1"
 source = { virtual = "." }
 dependencies = [
     { name = "forge-gripper-action-controller" },
@@ -92,7 +92,7 @@ dev = [
 
 [[package]]
 name = "forge-gripper-action-controller"
-version = "2.0.0"
+version = "2.0.1"
 source = { editable = "packages/gripper_action_controller" }
 dependencies = [
     { name = "dora-rs" },
@@ -109,7 +109,7 @@ requires-dist = [
 
 [[package]]
 name = "forge-joint-trajectory-controller"
-version = "2.0.0"
+version = "2.0.1"
 source = { editable = "packages/joint_trajectory_controller" }
 dependencies = [
     { name = "dora-rs" },
