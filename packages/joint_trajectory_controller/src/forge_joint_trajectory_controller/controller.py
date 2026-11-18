@@ -251,7 +251,8 @@ class JointTrajectoryController:
             # conditions abort the motion: a hard deviation, or a stalled plant.
             self._history.append((now_ns, tuple(self._actual.positions)))
             window_start_ns = now_ns - self.config.stuck_window_ns
-            while self._history and self._history[0][0] < window_start_ns:
+            # Keep the newest sample at or before the start of the window.
+            while len(self._history) > 1 and self._history[1][0] <= window_start_ns:
                 self._history.popleft()
 
             worst_index = max(
@@ -337,7 +338,10 @@ class JointTrajectoryController:
         if len(self._history) < 2 or self._actual is None:
             return False
         oldest_ns, oldest_positions = self._history[0]
-        window_elapsed_ns = max(0, elapsed_ns - (now_ns - oldest_ns))
+        observed_ns = now_ns - oldest_ns
+        if observed_ns < self.config.stuck_window_ns:
+            return False
+        window_elapsed_ns = max(0, elapsed_ns - observed_ns)
         reference_old = sample_trajectory(active.trajectory, window_elapsed_ns)
         reference_moved = max(
             abs(current - previous)
