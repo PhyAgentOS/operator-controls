@@ -1,6 +1,6 @@
 [project]
 name = "forge-gripper-action-controller"
-version = "0.1.0"
+version = "1.0.0"
 description = "Dora GripperCommand controller for Forge robotics dataflows."
 readme = "README.md"
 requires-python = ">=3.12"
