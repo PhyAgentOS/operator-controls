@@ -23,6 +23,8 @@ def _config(**overrides: object) -> ControllerConfig:
         "goal_time_tolerance_ns": 50,
     }
     values.update(overrides)
+    if "path_abort_tolerance" not in values:
+        values["path_abort_tolerance"] = max(0.5, float(values["path_position_tolerance"]))
     return ControllerConfig(**values)  # type: ignore[arg-type]
 
 
@@ -139,7 +141,9 @@ def test_tick_emits_full_position_command_and_feedback() -> None:
 
 
 def test_path_violation_aborts_and_holds_actual() -> None:
-    controller = JointTrajectoryController(_config(path_position_tolerance=0.01))
+    controller = JointTrajectoryController(
+        _config(path_position_tolerance=0.01, path_abort_tolerance=0.01)
+    )
     controller.update_joint_state(_state(), 0)
     controller.accept_goal("goal", _goal(), 0)
 
@@ -271,3 +275,78 @@ def test_goal_velocity_tolerance_compares_desired_and_actual() -> None:
 
     assert output is not None and output.result is not None
     assert output.result.error_code == "SUCCESS"
+
+
+def test_moderate_tracking_lag_does_not_abort() -> None:
+    """A lag inside the hard band is normal; plant capability is not judged per tick."""
+    controller = JointTrajectoryController(_config(path_abort_tolerance=0.5))
+    controller.update_joint_state(_state(), 0)
+    assert controller.accept_goal("goal", _goal(), 0) is None
+
+    controller.update_joint_state(_state(positions=(0.0, 0.0)), 25)
+    output = controller.tick(25)
+
+    assert output is not None
+    assert output.result is None
+    assert output.command is not None
+
+
+def test_hard_deviation_aborts_and_reports_the_joint() -> None:
+    controller = JointTrajectoryController(_config(path_abort_tolerance=0.5))
+    controller.update_joint_state(_state(), 0)
+    assert controller.accept_goal(
+        "goal", _goal(target=(0.2, -2.0), duration_ns=1_000_000_000), 0
+    ) is None
+
+    controller.update_joint_state(_state(positions=(0.0, 0.0)), 500_000_000)
+    output = controller.tick(500_000_000)
+
+    assert output is not None and output.result is not None
+    assert output.result.error_code == "PATH_TOLERANCE_VIOLATED"
+    assert "j2" in output.result.message
+    assert "exceeds abort tolerance" in output.result.message
+
+
+def test_stalled_plant_aborts_after_the_window() -> None:
+    """Reference keeps moving while the plant never moves -> stall abort."""
+    controller = JointTrajectoryController(
+        _config(path_abort_tolerance=5.0, stuck_window_ns=200_000_000)
+    )
+    controller.update_joint_state(_state(), 0)
+    assert controller.accept_goal("goal", _goal(duration_ns=2_000_000_000), 0) is None
+
+    for elapsed_ns in (0, 50_000_000, 100_000_000, 199_000_000):
+        controller.update_joint_state(_state(), elapsed_ns)
+        output = controller.tick(elapsed_ns)
+        assert output is not None and output.result is None
+
+    # The first tick after the window has elapsed is slightly late.
+    controller.update_joint_state(_state(), 201_000_000)
+    result = controller.tick(201_000_000)
+    assert result is not None and result.result is not None
+    assert result.result.error_code == "PATH_TOLERANCE_VIOLATED"
+    assert "no measurable progress" in result.result.message
+
+
+def test_abort_keeps_commanding_the_measured_position() -> None:
+    """Recovery is deliberately trivial: hold the measured pose, no decel ramp, no retry."""
+    controller = JointTrajectoryController(
+        _config(path_position_tolerance=0.01, path_abort_tolerance=0.01)
+    )
+    controller.update_joint_state(_state(positions=(0.3, -0.4)), 0)
+    controller.accept_goal("goal", _goal(first=(0.3, -0.4)), 0)
+
+    aborted = controller.tick(25)
+    assert aborted is not None and aborted.result is not None
+    assert aborted.result.error_code == "PATH_TOLERANCE_VIOLATED"
+    assert controller.state == "HOLDING"
+
+    # Every later tick keeps commanding the position measured at the abort.
+    for elapsed_ns in range(30, 200, 10):
+        controller.update_joint_state(_state(positions=(0.3, -0.4)), elapsed_ns)
+        hold = controller.tick(elapsed_ns)
+        assert hold is not None, "the controller must keep holding after an abort"
+        assert hold.result is None
+        assert hold.command is not None
+        assert hold.command.mode == "position"
+        assert hold.command.position == pytest.approx([0.3, -0.4])

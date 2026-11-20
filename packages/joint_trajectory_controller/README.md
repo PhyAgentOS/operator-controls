@@ -31,7 +31,21 @@ Outputs:
 - `trajectory_result`: `forge_msgs.FollowJointTrajectoryResult`, metadata `goal_id` and lowercase
   `goal_status`
 
+## Abort and hold behavior
+
+The controller plays the trajectory reference back; it does not judge whether the
+plant keeps up with it (see `path_abort_tolerance` / `stuck_*` for the two coarse
+abort conditions). After an abort — or a cancel, or a feedback timeout — the
+controller enters `HOLDING` and keeps commanding **the position measured at that
+moment** on every subsequent tick:
+
+* no deceleration ramp is generated;
+* no automatic retry or replanning is performed;
+* the caller decides what to do next (a new goal starts from the held pose).
+
 ## Version 0.1 behavior
+
+
 
 - exact configured trajectory joint order; partial trajectories are rejected;
 - fresh complete feedback is required, but incoming `JointState` may include extra joints and use

@@ -6,7 +6,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from check_release_line import validate
+if __package__:
+    from .check_release_line import validate
+else:
+    from check_release_line import validate
 
 
 class ReleaseLineTests(unittest.TestCase):

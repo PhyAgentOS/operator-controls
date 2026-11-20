@@ -1,6 +1,6 @@
 [project]
 name = "forge-joint-trajectory-controller"
-version = "2.0.0"
+version = "2.0.1"
 description = "Dora FollowJointTrajectory controller for Forge robotics dataflows."
 readme = "README.md"
 requires-python = ">=3.12"
