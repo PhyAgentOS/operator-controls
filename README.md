@@ -1,3 +1,5 @@
+[简体中文](README_zh.md)
+
 # Forge Controls
 
 Reusable motion execution and control capabilities for Forge/Dora robotics dataflows.
@@ -34,3 +36,7 @@ It also checks that missing or invalid required arguments produce argparse exit 
 this source repository and retain their respective licenses; see
 [NOTICE](NOTICE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 Review the complete bundled artifact before publishing standalone executables.
+
+## CI policy
+
+Automated dependency vulnerability audits are not maintained as CI or merge gates on this branch. Existing tests, builds, and other checks remain in place. Removing the audit gate does not change locked dependencies or resolve previously reported vulnerabilities.
